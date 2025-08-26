@@ -1,0 +1,18 @@
+Resultados Obtenidos:
+
+Terminos: 100 | Pi: 3.13159 |
+Terminos: 1000 | Pi: 3.14059 |
+Terminos: 10000 | Pi: 3.14149 |
+Terminos: 1000000 | Pi: 3.14159 |
+
+Explicación:
+
+El programa intenta calcular pi, dividiendo los procesos de los calculos entre los hijos creados, en este caso fueron 10,
+por lo que cada hijo calculaba n/10 procesos totales
+
+Hubo una complicacion a la hora de hacer este programa, la cual fue que la funcion fork() al crear un hijo, este 
+no comparte memoria con el padre, por ejemplo: si el padre tiene la variable a, le hace fork despues de esta y el hijo
+cambia esta variable, para el padre no cambió nada, en otras palabras, el hijo crea copias de lo que tiene su padre. Por lo
+que se investigó sobre esto y se logró encontrar la funcion pipe(), la cual con lo que se entendió, esta reserva una parte en el kernel
+para guardar datos que se le asignan, y tanto el padre como el hijo pueden acceder a estos datos o escribir en estos ellos con
+read y write respectivamente, y así lograr una memoria compartida entre estos.

@@ -1,0 +1,20 @@
+Resultados Obtenidos:
+    10 procesos:
+        Serial version: Valor acumulado por 10 procesos es  10000  en 0.241000 ms
+        Fork version: Valor acumulado por 10 procesos es  10000  en 472.204000 ms
+    100 procesos:
+        Serial version: Valor acumulado por 100 procesos es  100000  en 0.203000 ms
+        Fork version: Valor acumulado por 100 procesos es  100000  en 889.271000 ms
+    1000 procesos:
+        Serial version: Valor acumulado por 1000 procesos es  1000000  en 2.054000 ms
+        Fork version: Valor acumulado por 1000 procesos es  1000000  en 6134.303000 ms
+
+Explicación:
+
+    Este programa hace que por cada proceso dado, se cree un hijo y este sume 1000 al resultado final, por lo tanto
+    entre más procesos hayan, más hijos van a haber para calcular ese resultado
+
+    Al igual que ejercicio de Pi, se necesitaba una memoria compartida, nada más que esta vez se implementó una dinamica diferente
+    a la anterior, aunque aún se siga usando pipe, ya que son muchos más procesos que el pasado, en vez de tener un solo espacio de memoria
+    compartida entre todos los hijos y padre, se optó por tener una por hijo para que compartiera con el padre, por eso el array de
+    fds, y así lograr tener los resultados individuales de cada hijo al final para que el padre solo los sume en conjunto.
