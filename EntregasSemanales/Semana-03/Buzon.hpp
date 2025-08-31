@@ -1,3 +1,4 @@
+
 /**
   *  C++ class to encapsulate Unix message passing intrinsic structures and system calls
   *
@@ -7,52 +8,45 @@
  **/
 
 #include <unistd.h>	// pid_t definition
-#include <sys/msg.h>
-#include<iostream>
+#include<sys/msg.h>
+#include<stdexcept>
+#include<cstring>
 
 #define KEY 0xA12345	// Valor de la llave del recurso
-#define LABEL_SIZE 64
-
-//Datos neccesarios para el mensaje
-
-struct mensaje{
-   long mtype;     // message type, must be > 0 
-   int times;	// Times that label appears
-   char label[ LABEL_SIZE ];  // Label to send to mailbox
-};
-
-class Buzon {    
+class Buzon {
 private:
     int id;		// Identificador del buzon
-
+    pid_t owner;	// Dueño del recurso
+    bool creador;
 public:
-    Buzon() {
-        // Use semget to create a System V semaphore set identifier
-        this->id = msgget(KEY, IPC_CREAT|0600);
+    Buzon(bool crear = true) {
+        if(crear){
+            id = msgget(KEY, 0600 | IPC_CREAT);
+            creador = true;
+        }
+        else{
+            id = msgget(KEY, 0600);
+            creador = false;
+        }
+        if(id == -1){
+            if(errno == ENOENT){
+                throw std::runtime_error("No se ha creado un buzón aún, nada que recibir");
+            } else {
+                throw std::runtime_error("Error al crear el buzon");
+            }
+        }
+        owner = getpid();
     }
     ~Buzon() {
-        std::cout << "Destructor | " <<  msgctl( id, IPC_RMID, NULL );
-    }
-    ssize_t Enviar(const char * texto, long  etiqueta) {
-        mensaje msg;
-        msg.mtype = etiqueta;
-        strcpy(msg.label, texto);
-        msg.times = strlen(texto);
-
-        ssize_t st = msgsnd(this -> id, &msg, sizeof(msg), IPC_NOWAIT);
-
-        if(st == -1) {
-            perror("msgsend");
+        //El que recibe el mensaje se encarga de cerrar el buzon, ya que si se cierra antes de recibirlo no llega nada
+        if(!creador){
+            msgctl(id, IPC_RMID, NULL);
         }
-        return st;
-
     }
-    ssize_t Recibir(mensaje &msg, long etiqueta = 1 ){ // size_t: space in buffer
-        ssize_t st = msgrcv(this->id, &msg, sizeof(msg), etiqueta, IPC_NOWAIT);
-        if(st == -1){
-            perror("msgrcv");
-        }
-        return msgrcv(this->id, &msg, sizeof(msg), etiqueta, IPC_NOWAIT);
-    }	
-
+    ssize_t Enviar( const void *buffer, size_t size, long type = 1){ // Send a message (len sized) pointed by buffer to mailbox
+        return msgsnd(this->id, buffer, size, IPC_NOWAIT);
+    }
+    ssize_t Recibir(void *buffer, size_t size, long type = 1){ // size_t: space in buffer
+        return msgrcv(id, buffer, size, type, IPC_NOWAIT);
+    }
 };

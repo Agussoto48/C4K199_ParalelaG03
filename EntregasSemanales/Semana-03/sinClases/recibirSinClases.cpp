@@ -25,13 +25,13 @@ int main( int argc, char ** argv ) {
 
 
 struct msgbuf {
-       long mtype;     // message type, must be > 0 
-       int times;	// Times that label appears
-       char label[ LABEL_SIZE ];  // Label to send to mailbox
+   long mtype;     // message type, must be > 0 
+   int times;	// Times that label appears
+   char label[ LABEL_SIZE ];  // Label to send to mailbox
 };
 
    struct msgbuf A;
-   int id, i, size, st;
+   int id, size, st;
 
    id = msgget( KEY, 0600 );
    if ( -1 == id ) {
@@ -40,7 +40,6 @@ struct msgbuf {
    }
 
    size = sizeof( A );
-   i = 0;
 
    st = msgrcv( id,  &A, size, 2025, IPC_NOWAIT );
    while ( st > 0 ) {

@@ -59,10 +59,4 @@ struct msgbuf {
       printf("Label: %s, status %d \n", html_labels[ i ], st );
       i++;
    }
-
-
-/*
-   msgctl( id, IPC_RMID, NULL );
-*/
-
 }
