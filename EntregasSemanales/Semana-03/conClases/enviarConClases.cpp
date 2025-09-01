@@ -13,13 +13,9 @@
 #define LABEL_SIZE 64
 #include <stdio.h>
 #include <string.h>
-#include "../Buzon.hpp"
+#include "../shared/Buzon.hpp"
+#include "../shared/estructuras.hpp"
 
-struct msg {
-   long mtype;
-   int times;
-   char mtext[64];
-};
 const char * html_labels[] = {
    "a",
    "b",

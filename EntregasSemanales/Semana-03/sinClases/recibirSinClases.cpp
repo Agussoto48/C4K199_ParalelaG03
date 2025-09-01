@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../shared/estructuras.hpp"
 
 #define KEY 0xA12345
 #define LABEL_SIZE 64
@@ -23,14 +24,7 @@
 
 int main( int argc, char ** argv ) {
 
-
-struct msgbuf {
-   long mtype;     // message type, must be > 0 
-   int times;	// Times that label appears
-   char label[ LABEL_SIZE ];  // Label to send to mailbox
-};
-
-   struct msgbuf A;
+   struct msg A;
    int id, size, st;
 
    id = msgget( KEY, 0600 );
@@ -43,7 +37,7 @@ struct msgbuf {
 
    st = msgrcv( id,  &A, size, 2025, IPC_NOWAIT );
    while ( st > 0 ) {
-      printf("Label: %s, times %d \n", A.label, A.times );
+      printf("Label: %s, times %d \n", A.mtext, A.times );
       st = msgrcv( id,  &A, size, 2025, IPC_NOWAIT );
    }
 

@@ -1,4 +1,4 @@
-
+#pragma once
 /**
   *  C++ class to encapsulate Unix message passing intrinsic structures and system calls
   *
@@ -30,7 +30,7 @@ public:
         }
         if(id == -1){
             if(errno == ENOENT){
-                throw std::runtime_error("No se ha creado un buzón aún, nada que recibir");
+                perror("No se ha creado un buzón aún, nada que recibir: ");
             } else {
                 throw std::runtime_error("Error al crear el buzon");
             }
