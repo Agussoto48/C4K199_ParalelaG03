@@ -14,6 +14,7 @@ SRC_RCV_SC = sinClases/recibirSinClases.cpp
 #Archivos fuentes de los demas ejercios
 SRC_PI = otrosEjercicios/PiPorSeries.cpp
 SRC_SHM = otrosEjercicios/pruebaShM.cpp
+SRC_SU = otrosEjercicios/SumaUno.cpp
 
 #Achivo fuente de la biblioteca de semaforos (cpp)
 SRC_SEM = shared/Semaforo.cpp
@@ -27,10 +28,11 @@ EXE_RCV_SC = $(BIN_DIR)/recibir
 
 EXE_PI = $(BIN_DIR)/PiPorSeries $(ARGS)
 EXE_SHM = $(BIN_DIR)/pruebaShM
+EXE_SU = $(BIN_DIR)/SumaUno $(ARGS)
 
 
 # Regla por defecto
-default: buildClase buildSinClase buildPi buildSHM
+default: buildClase buildSinClase buildPi buildSHM buildSu
 
 # Crear bin si no existe
 $(BIN_DIR):
@@ -65,11 +67,17 @@ buildPi:
 buildSHM:
 	$(CXX) $(CXXFLAGS) $(SRC_SHM) $(SRC_SEM) -o $(EXE_SHM)
 
+buildSu:
+	$(CXX) $(CXXFLAGS) $(SRC_SU) -o $(EXE_SU)
+
 runPi:
 	@./$(EXE_PI)
 
 runShm:
 	@./$(EXE_SHM)
+
+runSU:
+	@./$(EXE_SU)
 
 # Clean
 clean:
