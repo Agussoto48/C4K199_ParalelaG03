@@ -54,11 +54,11 @@ int main( int argc, char ** argv ) {
       terminos = atol( argv[ 1 ] );
    }
 
+   Buzon sender(true);
+   Buzon receiver(false);
    for ( proceso = 0; proceso < 10; proceso++ ) {
       inicio = proceso * terminos/10;
       fin = (proceso + 1) * terminos/10;
-      Buzon sender(true);
-      Buzon receiver(false);
       /*struct resultado A;
       struct resultado B;
       A.mtype = 2025;
@@ -69,7 +69,7 @@ int main( int argc, char ** argv ) {
       std::cout <<"\n\n" << B.answer << "\n\n";*/
 
       pid = fork();
-      if ( ! pid ) {
+      if (pid  == 0) {
          struct resultado res;
          res.mtype = 2000;
          res.answer = 0;
@@ -78,29 +78,27 @@ int main( int argc, char ** argv ) {
          sender.Enviar(&res, sizeof(res), 2000);
          exit(0);
       } else {
-         struct resultado contenedor;
-         contenedor.mtype = 2000;
-         contenedor.answer = 0;
          /*struct resultado contenedor;
          contenedor.mtype = 2000;*/
-         /*ssize_t a =*/ receiver.Recibir(&contenedor, sizeof(contenedor), 2000);
+         /*ssize_t a =*/ 
          //std::cout << "Resultado: " << a << " | " << res.answer << std::endl;
          printf("%d) Creating process %d: starting value %ld, finish at %ld\n",proceso , pid, inicio, fin );
-         casiPi[proceso] = contenedor.answer;
-         if(proceso != 9) receiver.~Buzon();
       }
    }
-   
+   double pi = 0.0;
+   for ( proceso = 1; proceso < 10; proceso++ ) {
+      struct resultado contenedor;
+      contenedor.mtype = 2000;
+      contenedor.answer = 0;
+      receiver.Recibir(&contenedor, sizeof(contenedor), 2000);
+      pi += contenedor.answer;
+   }
    for ( proceso = 0; proceso < 10; proceso++ ) {
       int status;
       wait( &status );
    }
 
-   for ( proceso = 1; proceso < 10; proceso++ ) {
-      casiPi[ 0 ] += casiPi[ proceso ];
-   }
-
-   printf( "Valor calculado de Pi es \033[91m %g \033[0m con %ld terminos\n", casiPi[ 0 ], terminos );
+   printf( "Valor calculado de Pi es \033[91m %g \033[0m con %ld terminos\n", pi, terminos );
 
 
 }
