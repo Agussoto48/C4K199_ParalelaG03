@@ -2,9 +2,6 @@
 #include<iostream>
 #include "Mesa.hpp"
 
-/*
- *
-**/
 Mesa::Mesa() {
    int filo;
    this->lock = new Lock(); 
@@ -70,11 +67,9 @@ void Mesa::test( int filosofo ) {
          this->state[ filosofo ] = EATING;
          this->self[ filosofo ]->Signal();
       }
-
 }
 
 void Mesa::print(){
-   //printf("States [");
    for (int i = 0; i < FILOMAX; i++) {
       std::cout << "F" << i+1 << ": ";
       switch (this->state[i])
@@ -91,7 +86,6 @@ void Mesa::print(){
       default:
          break;
       }
-      //printf("F%d: %c | ", i+1,(this->state[i] == THINKING)? 'T' : (this->state[i] == HUNGRY)? 'H' : 'E');
    }
    
    std::cout << "\n\n";
