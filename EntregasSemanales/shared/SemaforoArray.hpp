@@ -14,6 +14,8 @@ union semun{
 class SemaforoArray {
 private:
     int id;		// Identificador del semaforo
+    pid_t owner;
+    int nsems;
 public:
     union semun h;
     sembuf s;

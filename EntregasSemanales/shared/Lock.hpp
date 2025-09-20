@@ -1,6 +1,7 @@
 #ifndef _LOCK_H
 #define _LOCK_H
 #include "SemaforoArray.hpp"
+//#include "Semaforo.hpp"
 
 class Lock {
    public:
@@ -10,7 +11,7 @@ class Lock {
       void Release();
 
    private:
-      SemaforoArray * lock;
+      SemaforoArray * semaforo;
 
 };
 

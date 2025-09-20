@@ -5,7 +5,7 @@
  */
 Lock::Lock() {
 
-   this->lock = new SemaforoArray(1, 1);
+   this->semaforo = new SemaforoArray(1, 1);
 
 }
 
@@ -15,7 +15,7 @@ Lock::Lock() {
  */
 Lock::~Lock() {
 
-   delete this->lock;
+   delete this->semaforo;
 
 }
 
@@ -25,7 +25,7 @@ Lock::~Lock() {
  */
 void Lock::Acquire() {
 
-   this->lock->Wait();
+   this->semaforo->Wait();
 
 } 
 
@@ -36,6 +36,6 @@ void Lock::Acquire() {
  */
 void Lock::Release() {
 
-   this->lock->Signal();
+   this->semaforo->Signal();
 
 }

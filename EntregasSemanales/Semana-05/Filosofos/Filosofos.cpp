@@ -26,11 +26,13 @@ int Filosofo( int cual, Mesa * mesa ) {
       think = rand() & 0xfffff;
       usleep( think );
       mesa->pickup( cual );
-      printf( "El filósofo %d está comiendo\n", cual );
+      mesa->print();
+      //printf( "El filósofo %d está comiendo\n", cual );
       eat = rand() & 0xfffff;
       usleep( eat );
       mesa->putdown( cual );
-      printf( "El filósofo %d está pensando\n", cual );
+      //printf( "El filósofo %d está pensando\n", cual );
+      mesa->print();
       think = rand()  & 0xfffff;
       usleep( think );
    }
@@ -63,7 +65,8 @@ int main( int argc, char ** argv ) {
    }
 
    filoMesa = (struct FiloMesa *) shmat( memId, NULL, 0 );
-   memcpy( filoMesa, mesa, sizeof( Mesa ) );	// Copy object to shared segment
+   new (&filoMesa->redonda) Mesa();
+   //¿memcpy(filoMesa, mesa, sizeof( Mesa ) );	// Copy object to shared segment
 
 // Create philosophers
    for ( worker = 0; worker < workers; worker++ ) {
@@ -75,9 +78,9 @@ int main( int argc, char ** argv ) {
 
    for ( worker = 0; worker < workers; worker++ ) {
       int status;
-      pid_t pid = wait( &status );
+      wait( &status );
    }
-
+   printf( "\nNormal end of execution.\n" );
    shmdt( filoMesa );
    shmctl( memId, IPC_RMID, NULL );
 

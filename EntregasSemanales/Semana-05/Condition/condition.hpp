@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Lock.hpp"
 
 class Condition {
@@ -12,7 +12,7 @@ class Condition {
       void Signal();
 
    private:
-     int workers;
+     int hilos;
      Lock * internalWaitMechanism;
 
 };

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include<iostream>
 #include "Mesa.hpp"
 
 /*
@@ -6,7 +7,6 @@
 **/
 Mesa::Mesa() {
    int filo;
-
    this->lock = new Lock(); 
    for ( filo = 0; filo < FILOMAX; filo++ ) {
       this->state[ filo ] = THINKING;
@@ -24,39 +24,75 @@ Mesa::~Mesa() {
 
 }
 
-
-int Mesa::pickup( int filosofo ) {
-
+//Empieza a comer el filosofo actual
+//Funcion punto critico
+void Mesa::pickup( int filosofo ) {
    this->lock->Acquire();
-   this->state[ filosofo ] = HUNGRY;
-   test( filosofo );
-   if ( this->state[ filosofo ] != EATING ) {
-      this->self[ filosofo ]->Wait( this->lock );
+   {
+      //Se pone hambriento
+      this->state[ filosofo ] = HUNGRY;
+      //Comprobamos que sí pueda empezar a comer
+      test( filosofo );
+      //Si no puede empezar a comer entonces esperamos
+      if ( this->state[ filosofo ] != EATING ) {
+         //Hacemos lock en la mesa
+         this->self[ filosofo ]->Wait( this->lock );
+      }
    }
-
    this->lock->Release();
 
 }
 
-int Mesa::putdown( int filosofo ) {
+//Termino de comer el filosofo actual
+//Funcion punto critico
+void Mesa::putdown( int filosofo ) {
 
    this->lock->Acquire();
+   {
 
-   this->state[ filosofo ] = THINKING;
-   test( (filosofo + 4 ) % 5 );
-   test( (filosofo + 1 ) % 5 );
-
+      this->state[ filosofo ] = THINKING;
+      test( (filosofo + 4 ) % 5 );
+      test( (filosofo + 1 ) % 5 );
+   }
    this->lock->Release();
 
 }
 
-int Mesa::test( int filosofo ) {
-
-   if ( this->state[ (filosofo + 4) % 5 ] != EATING &&
+//Funcion que comprueba que puede comer, solo si cumple las condiciones
+void Mesa::test( int filosofo ) {
+   if (  //Filosofo de la derecha no esta comiendo
+        this->state[ (filosofo + 4) % 5 ] != EATING &&
+        //Filosofo de la izquierda no esta comiendo
         this->state[ (filosofo + 1) % 5 ] != EATING &&
-        this->state[ filosofo ] == HUNGRY ) {
-      this->state[ filosofo ] = EATING;
-      this->self[ filosofo ]->Signal();
-   }
+        //Filosofo esta hambriento
+        this->state[ filosofo ] == HUNGRY ) 
+      {
+         this->state[ filosofo ] = EATING;
+         this->self[ filosofo ]->Signal();
+      }
 
+}
+
+void Mesa::print(){
+   //printf("States [");
+   for (int i = 0; i < FILOMAX; i++) {
+      std::cout << "F" << i+1 << ": ";
+      switch (this->state[i])
+      {
+      case THINKING:
+         std::cout << "\033[34mT\033[0m | ";
+         break;
+      case HUNGRY:
+         std::cout << "\033[33mH\033[0m | ";
+         break;
+      case EATING:
+         std::cout << "\033[31mE\033[0m | ";
+         break;
+      default:
+         break;
+      }
+      //printf("F%d: %c | ", i+1,(this->state[i] == THINKING)? 'T' : (this->state[i] == HUNGRY)? 'H' : 'E');
+   }
+   
+   std::cout << "\n\n";
 }

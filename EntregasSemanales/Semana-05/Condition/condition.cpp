@@ -3,12 +3,11 @@
 /*
  *  Creates a new condition variable
  *
- *  Uses an internal structure to make workers wait for resources
+ *  Uses an internal structure to make hilos wait for resources
  *
 **/
 Condition::Condition() {
-
-   this->workers = 0;
+   this->hilos = 0;
    this->internalWaitMechanism = new Lock();	// Could be any other mechanism
 
 }
@@ -30,9 +29,11 @@ Condition::~Condition() {
 **/
 void Condition::Wait( Lock * affectedLock ) {
 
-   this->workers++;
-
-   // To be completed by students
+   this->hilos++;
+   affectedLock->Release();
+   this->internalWaitMechanism->Acquire();
+   this->internalWaitMechanism->Release();
+   affectedLock->Acquire();
 
 } 
 
@@ -42,13 +43,10 @@ void Condition::Wait( Lock * affectedLock ) {
  *
 **/
 void Condition::NotifyOne() {
-
-   if ( this->workers > 0 ) {
-      this->workers--;	// One
-   // To be completed by students
-
+   if ( this->hilos > 0 ) {
+      this->hilos--;	// One
+      this->internalWaitMechanism->Release();
    }
-
 }
 
 
@@ -57,21 +55,17 @@ void Condition::NotifyOne() {
  *
 **/
 void Condition::Signal() {
-
    this->NotifyOne();
-
 }
 
-
 /**
- *  Signal all workers from the queue, if empty has no effect
+ *  Signal all hilos from the queue, if empty has no effect
  *
 **/
 void Condition::NotifyAll() {
-
-   while ( this->workers > 0 ) {
-      this->workers--;
-   // To be completed by students
+   while ( this->hilos > 0 ) {
+      this->hilos--;
+      this->internalWaitMechanism->Release();
    }
 
 }

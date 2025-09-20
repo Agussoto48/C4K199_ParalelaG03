@@ -6,8 +6,8 @@
  * Ref.: https://en.wikipedia.org/wiki/Semaphore_(programming)
  *
  */
-
- #include <stdexcept>            // runtime_error
+#pragma once
+#include <stdexcept>            // runtime_error
 #include<sys/sem.h>
 #include<iostream>
 union semun{

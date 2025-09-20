@@ -1,0 +1,1 @@
+La clase semaforo que había que completar ya está hecha en la carpeta shared, está guardada como SemaforoArray.hpp
