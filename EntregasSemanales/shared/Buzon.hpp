@@ -44,9 +44,9 @@ public:
         }
     }
     ssize_t Enviar( const void *buffer, size_t size, long type = 1){ // Send a message (len sized) pointed by buffer to mailbox
-        return msgsnd(this->id, buffer, size, IPC_NOWAIT);
+        return msgsnd(this->id, buffer, size, 0);
     }
     ssize_t Recibir(void *buffer, size_t size, long type = 1){ // size_t: space in buffer
-        return msgrcv(id, buffer, size, type, IPC_NOWAIT);
+        return msgrcv(id, buffer, size, type, 0);
     }
 };
