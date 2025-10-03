@@ -48,9 +48,10 @@ struct RondaPapa {
    int valor_papa;
    int cuenta_jugadores;
    bool clockwise;
-   bool estados[10];
+   //Un buffer grande
+   bool estados[256];
 };
-extern Semaforo turno(1);
+Semaforo turno(1);
 
 //Inicializamos buzones
 Buzon sender(true);
@@ -67,6 +68,7 @@ int rng(int min, int max);
 
 
 int main( int argc, char ** argv ) {
+   struct RondaPapa juego;
    int i, resultado;
    if ( argc > 1 ) {
       participantes = atoi( argv[ 1 ] );
@@ -74,13 +76,35 @@ int main( int argc, char ** argv ) {
    if ( participantes <= 0 ) {
       participantes = MaxParticipantes;
    }
+   if(argc > 2){
+      int posicion = atoi(argv[2]);
+      if(posicion < 1 || posicion > participantes){
+         std::cout << "Argumento 2 inválido, tiene que estar dentro del rango" << std::endl;
+         return 1;
+      }
+      juego.posicion_papa = posicion;
+   }
+   else{
+      //Empieza en 1 por default
+      juego.posicion_papa = 1;
+   }
 
-   struct RondaPapa juego;
+   if(argc > 3){
+      if(atoi(argv[3]) > 1 || atoi(argv[3]) < 0){
+         std::cout << "Argumento 3 inválido, tiene que ser 1 o 0" << std::endl;
+         return 1;
+      }
+      juego.clockwise = atoi(argv[3]);
+   }
+   else{
+      //Avanza a la derecha por default
+      juego.clockwise = true;
+   }
    //Estas variables por default ahora
-   juego.clockwise = true;
-   juego.posicion_papa = 1;
+   //juego.clockwise = true;
+   //juego.posicion_papa = 1;
    juego.valor_papa = rng(5, 10);
-   for(int i = 0; i < 10; i++){
+   for(int i = 0; i < participantes; i++){
       juego.estados[i] = true;
    }
    //printf( "Creando una ronda de %d participantes\n", participantes );
@@ -95,7 +119,7 @@ int main( int argc, char ** argv ) {
    // Creación del proceso invasor
    if ( ! fork() ) {
       sleep(1);
-      for(int i = 0; i < 5; i++){
+      for(int i = 0; i < participantes; i++){
          invasor( i, juego);
          usleep(rng(80000, 90000));
       }
@@ -122,7 +146,7 @@ int main( int argc, char ** argv ) {
  **/
 void manejo_jugador(int id, struct RondaPapa juego){
    //Esperamos hasta que todos los jugadores estén
-   if(juego.cuenta_jugadores < 10){
+   if(juego.cuenta_jugadores < participantes){
       receiver.Recibir(&juego, sizeof(RondaPapa), 0);
    }
    //Cuando llegue el ultimo le notifica a los demás
@@ -201,15 +225,18 @@ int pasarPapa(struct RondaPapa* juego){
    do{
       juego->posicion_papa += operacion;
       if(juego->posicion_papa < 1){
-         juego->posicion_papa = 10;
+         juego->posicion_papa = participantes;
       }
-      if(juego->posicion_papa > 10){
+      if(juego->posicion_papa > participantes){
          juego->posicion_papa = 1;
       }
    } while(!juego->estados[juego->posicion_papa - 1]);
    std::cout << "[";
    for(int i = 0; i < participantes; i++){
-      std::cout << juego->estados[i] << ", ";
+      if(i == participantes - 1)
+         std::cout << juego->estados[i];
+      else
+         std::cout << juego->estados[i] << ", ";
    }
    std::cout << "]" << std::endl;
    //std::cout << juego->posicion_papa << std::endl;

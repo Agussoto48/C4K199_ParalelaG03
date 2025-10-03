@@ -26,7 +26,7 @@ runMonos:
 	./$(EXE_MONOS)
 
 runPapas:
-	./$(EXE_PAPAS)
+	./$(EXE_PAPAS) $(ARGS)
 
 clean:
 	@rm -rf $(BIN_DIR)
