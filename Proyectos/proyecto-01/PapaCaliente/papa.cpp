@@ -21,6 +21,13 @@
 #include "Semaforo.hpp"
 
 #define MaxParticipantes 10
+#define RED "\33[31m"
+#define GREEN "\33[32m"
+#define YELLOW "\33[33m"
+#define BLUE "\33[34m"
+#define RESET "\33[0m"
+
+
 
 // Variable global para el número de participantes
 int participantes = MaxParticipantes;
@@ -60,7 +67,7 @@ int rng(int min, int max);
 
 
 int main( int argc, char ** argv ) {
-   int i, j, resultado;
+   int i, resultado;
    if ( argc > 1 ) {
       participantes = atoi( argv[ 1 ] );
    }
@@ -87,15 +94,20 @@ int main( int argc, char ** argv ) {
    }
    // Creación del proceso invasor
    if ( ! fork() ) {
-      invasor( i, juego);
+      sleep(1);
+      for(int i = 0; i < 5; i++){
+         invasor( i, juego);
+         usleep(rng(80000, 90000));
+      }
+      _exit( 0 );
    }
 
    // Espera que los participantes finalicen
    for ( i = 1; i <= participantes; i++ ) {
-      j = wait( &resultado );
+      wait( &resultado );
    }
    
-   j = wait( &resultado );  // Espera por el invador
+   wait( &resultado );  // Espera por el invador
 
    return 0;
 
@@ -111,7 +123,7 @@ int main( int argc, char ** argv ) {
 void manejo_jugador(int id, struct RondaPapa juego){
    //Esperamos hasta que todos los jugadores estén
    if(juego.cuenta_jugadores < 10){
-      receiver.Recibir(&juego, sizeof(RondaPapa), 2025);
+      receiver.Recibir(&juego, sizeof(RondaPapa), 0);
    }
    //Cuando llegue el ultimo le notifica a los demás
    else{
@@ -123,36 +135,39 @@ void manejo_jugador(int id, struct RondaPapa juego){
    while(juego.estados[id-1] && juego.cuenta_jugadores > 1){
       //Si no es su turno, espera hasta un mensaje nuevo
       if(juego.posicion_papa != id){
-         receiver.Recibir(&juego, sizeof(RondaPapa), 2025);
-         //Lock
+         //std::cout << "(" << id << ") estoy esperando" << std::endl;
+         receiver.Recibir(&juego, sizeof(RondaPapa), 0);
+         if(juego.mtype == 40){
+            receiver.Recibir(&juego, sizeof(RondaPapa), 0);
+            std::cout << YELLOW << "Invasor denegado por (" << id << ")" << RESET << std::endl;
+         }
       }
       //Zona critica
       else{
          turno.Wait();
-         std::cout<<"Es mi turno("<<id<<")" << std::endl;
+         std::cout<< BLUE << "Es mi turno("<<id<<")" << RESET << std::endl;
          
          valorPapa(&juego.valor_papa);
-         //std::cout<<"Estuve aqui V" << std::endl; 
          pasarPapa(&juego);
-         //std::cout<<"Estuve aqui P" << std::endl; 
-         int sendCount = juego.cuenta_jugadores;
          //Sale del juego si perdió
          if(juego.valor_papa == 1){
             juego.cuenta_jugadores -= 1;
             juego.estados[id-1] = false;
             juego.valor_papa = rng(5, 10);
-            std::cout<<"Jugador("<<id<<") sale" << std::endl;
+            std::cout << RED << "Papa exploto" << RESET << std::endl;
+            std::cout<< RED << "Jugador("<<id<<") sale" << RESET << std::endl;
          }
-         //std::cout<<"Estuve aqui Perdi" << std::endl; 
-         for(int i = 1; i < sendCount; i++){
-            sender.Enviar(&juego, sizeof(RondaPapa), 2025);
+         for(int i = 0; i < participantes; i++){
+            if(!(juego.estados[i] && i == id-1))
+               sender.Enviar(&juego, sizeof(RondaPapa), 2025);
          }
-         //std::cout<<"Estuve aqui Envio" << std::endl; 
+         //Esperar entre 0.6 a 0.8 segundos
+         usleep(rng(60000, 80000));
          turno.Signal();
       }
    }
    if(juego.cuenta_jugadores == 1 && juego.estados[id-1]){
-      std::cout << "Jugador (" << id << ") gana el juego" << std::endl;
+      std::cout << GREEN << "Jugador (" << id << ") gana el juego" << RESET << std::endl;
    }
    _exit( 0 );
 }
@@ -162,9 +177,11 @@ void manejo_jugador(int id, struct RondaPapa juego){
   *
  **/
 void invasor( int id, struct RondaPapa juego  ) {
-
-   _exit( 0 );
-
+   juego.mtype = 40;
+   juego.posicion_papa = 1;
+   juego.valor_papa = rng(5, 10);
+   sender.Enviar(&juego, sizeof(RondaPapa), 40);
+   std::cout<< YELLOW << "Paquete sospechoso enviado" << RESET << std::endl;
 }
 /**
   *  Aplica las reglas de Collatz al valor de la papa
@@ -181,22 +198,21 @@ int valorPapa(int *papa) {
 }
 int pasarPapa(struct RondaPapa* juego){
    int operacion = (juego->clockwise) ? 1 : -1;
-   int index;
    do{
-      index = juego->posicion_papa;
       juego->posicion_papa += operacion;
       if(juego->posicion_papa < 1){
          juego->posicion_papa = 10;
       }
       if(juego->posicion_papa > 10){
-         juego->posicion_papa = 0;
+         juego->posicion_papa = 1;
       }
-   } while(!juego->estados[index]);
+   } while(!juego->estados[juego->posicion_papa - 1]);
    std::cout << "[";
    for(int i = 0; i < participantes; i++){
       std::cout << juego->estados[i] << ", ";
    }
    std::cout << "]" << std::endl;
+   //std::cout << juego->posicion_papa << std::endl;
    return juego->posicion_papa;
 }
 int rng(int min, int max){
@@ -205,13 +221,3 @@ int rng(int min, int max){
     std::uniform_int_distribution<> distribution(min, max);
     return distribution(generator);
 }
-
-
-
-
-//Con estos comentarios funciona la base
-         /*juego.cuenta_jugadores -= 1;
-         juego.posicion_papa += 1;
-         if(juego.posicion_papa > 10){
-            juego.posicion_papa = 1;
-         }*/
