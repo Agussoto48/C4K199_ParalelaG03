@@ -23,7 +23,7 @@ buildPapa: | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) $(SRC_PAPAS) $(SRC_SHARED) -o $(EXE_PAPAS)
 	
 runMonos:
-	./$(EXE_MONOS)
+	./$(EXE_MONOS) $(ARGS)
 
 runPapas:
 	./$(EXE_PAPAS) $(ARGS)

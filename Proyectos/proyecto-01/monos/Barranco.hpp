@@ -10,11 +10,12 @@ enum {CUERDA_1 = 1, CUERDA_2 = 2};
 class Barranco{
     private:
         Lock * candado;
+        int cantidadMonos;
         //arreglos para controlar el comportamiento de los monos
-            enum {ESPERANDO = 0, EN_CUERDA_1 = 1, EN_CUERDA_2 = 2, PASO = 3} state[MONOS_DEFAULT];
-            int origen_mono[MONOS_DEFAULT];
-            int cuerda_elegida[MONOS_DEFAULT];
-        Condition * monos[MONOS_DEFAULT];
+            enum {ESPERANDO = 0, EN_CUERDA_1 = 1, EN_CUERDA_2 = 2, PASO = 3} state[256];
+            int origen_mono[256];
+            int cuerda_elegida[256];
+        Condition * monos[256];
         Cuerda cuerda1;
         Cuerda cuerda2;
         void test(int mono);
@@ -25,7 +26,7 @@ class Barranco{
 
     public:
         //Constructores y destructor
-        Barranco();
+        Barranco(int cantidad);
         ~Barranco();   
 
         //Funciones para la logica del juego
@@ -45,7 +46,7 @@ class Barranco{
         }
 
         void setState(){
-            for(int i = 0; i < MONOS_DEFAULT; i++){
+            for(int i = 0; i < this->cantidadMonos; i++){
                 state[i] = ESPERANDO;
                 origen_mono[i] = -1;
             }
@@ -54,7 +55,7 @@ class Barranco{
             this->cuerda_elegida[mono] = cuerda;
         }
         void printEstados(){
-            for(int i = 0; i < MONOS_DEFAULT; i++){
+            for(int i = 0; i < this->cantidadMonos; i++){
                 std::cout << state[i] << " | ";
             }
             std::cout<<"\n";

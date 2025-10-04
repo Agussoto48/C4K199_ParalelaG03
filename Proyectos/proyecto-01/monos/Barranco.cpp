@@ -1,12 +1,13 @@
 #include "Barranco.hpp"
 
 
-Barranco::Barranco()
+Barranco::Barranco(int cantidad)
     :   cuerda1(1),
-        cuerda2(2)
+        cuerda2(2),
+        cantidadMonos(cantidad)
     {
         candado = new Lock();
-        for(int i = 0; i < MONOS_DEFAULT; i++){
+        for(int i = 0; i < this->cantidadMonos; i++){
             this -> state[i] = ESPERANDO;
             this -> monos[i] = new Condition();
         }
@@ -14,7 +15,7 @@ Barranco::Barranco()
     }
 Barranco::~Barranco() {
     delete candado;
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         delete this->monos[i];
     }
 }   
@@ -66,7 +67,7 @@ void Barranco::cruzar(int mono){
     this->state[mono] = PASO;
 
     //Cambiar a que no dependa del origen de los monos sino a la cuerda elegida
-    for(int mono = 0; mono < MONOS_DEFAULT; mono++){
+    for(int mono = 0; mono < this->cantidadMonos; mono++){
         if(this->cuerda_elegida[mono] == CUERDA_1){
             testCuerda1(mono);
         }
@@ -83,7 +84,7 @@ void Barranco::cruzarCuerda1(int mono){
         this->cuerda1.liberarMono();
     }
     this->state[mono] = PASO;
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         if(i == mono)
             continue;
         if(this->cuerda_elegida[i] == CUERDA_1){
@@ -99,7 +100,7 @@ void Barranco::cruzarCuerda2(int mono){
         this->cuerda2.liberarMono();
     }
     this->state[mono] = PASO;
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         if(i == mono)
             continue;
         if(this->cuerda_elegida[i] == CUERDA_2){
@@ -157,14 +158,14 @@ void Barranco::print(){
     this->candado->Acquire();
 
     std::cout << "Lado Izquierdo (Sin pasar): ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == ESPERANDO && origen_mono[i] == IZQUIERDA)
             std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";
     }
     std::cout<<"\n";
     std::cout << "Lado Izquierdo (Pasado): ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == PASO && origen_mono[i] == DERECHA)
             std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";
@@ -172,14 +173,14 @@ void Barranco::print(){
     std::cout<<"\n";
 
     std::cout<<"Cuerda1: ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == EN_CUERDA_1)
             std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";
     }
     std::cout<<"\n";
     std::cout<<"Cuerda2: ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == EN_CUERDA_2)
             std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";
@@ -188,14 +189,14 @@ void Barranco::print(){
 
 
     std::cout << "Lado Derecho (Sin pasar): ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == ESPERANDO && origen_mono[i] == DERECHA)
            std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";
     }
     std::cout<<"\n";
     std::cout << "Lado Derecho (Pasado): ";
-    for(int i = 0; i < MONOS_DEFAULT; i++){
+    for(int i = 0; i < this->cantidadMonos; i++){
         char l = (this->origen_mono[i] == IZQUIERDA) ? 'I' : 'D';
         if(state[i] == PASO && origen_mono[i] == IZQUIERDA)
             std::cout<< i << "(" << this->cuerda_elegida[i] << "," << l << ")" << ", ";

@@ -39,6 +39,14 @@ int rng(int min, int max);
 //Main
 int main( int argc, char ** argv ) {
     int numMonos = 0, shmId, resultado;
+
+    //Definicion de cuantos monos hay depende de los parametros
+    if ( argc > 1 ) {
+        numMonos = atoi( argv[ 1 ] );
+    }
+    if ( numMonos <= 0 ) {
+        numMonos = MONOS_DEFAULT;
+    }
     struct compartido * escenario;
     //Creacion de memoria compartida
         shmId = shmget( IPC_PRIVATE, sizeof( struct compartido ), IPC_CREAT | 0600 );
@@ -47,20 +55,13 @@ int main( int argc, char ** argv ) {
             exit( 1 );
         }
         escenario = (struct compartido *) shmat( shmId, NULL, 0 );
-        new (&escenario->barranco) Barranco();
+        new (&escenario->barranco) Barranco(numMonos);
         escenario->barranco.setState();
         if ( (void *) -1 == escenario ) {
             perror( "main Shared Memory attach" );
             exit( 1 );
         }
     //Fin de creacion de memoria compartida
-    //Definicion de cuantos monos hay depende de los parametros
-    if ( argc > 1 ) {
-        numMonos = atoi( argv[ 1 ] );
-    }
-    if ( numMonos <= 0 ) {
-        numMonos = MONOS_DEFAULT;
-    }
     printf( "Creando una manada de %d monos\n", numMonos);
     for (int mono = 0; mono < numMonos; mono++ ) {
         //Definir la direccion del mono tanto la cuerda que le toca
