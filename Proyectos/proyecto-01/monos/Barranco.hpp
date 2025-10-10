@@ -1,6 +1,6 @@
 #pragma once
 #include "Cuerda.hpp"
-#include "condition.hpp"
+#include "conditionS.hpp"
 
 #define MONOS_DEFAULT 10
 

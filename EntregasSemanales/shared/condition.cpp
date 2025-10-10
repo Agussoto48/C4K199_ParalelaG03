@@ -1,4 +1,4 @@
-#include "condition.hpp"
+#include "conditionS.hpp"
 
 /*
  *  Creates a new condition variable
