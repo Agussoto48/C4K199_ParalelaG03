@@ -3,6 +3,7 @@
 #include<pthread.h>
 #include<iomanip>
 #include<time.h>
+#include<omp.h>
 
 #define RANGO 25
 struct Info{
