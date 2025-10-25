@@ -49,15 +49,13 @@ int main( int argc, char ** argv ) {
    int hilos = 10;
    omp_set_num_threads(hilos);
 
+   #pragma omp parallel for
    for (int proceso = 0; proceso < 10; proceso++ ) {
 
       inicio = proceso * terminos/10;
       fin = (proceso + 1) * terminos/10;
-      if (!pid){
-         double resultado = calcularSumaParcialPi(casiPi, proceso, inicio, fin );
-      } else {
-         printf("Creating process %d: starting value %ld, finish at %ld\n", pid, inicio, fin );
-      }
+      double resultado = calcularSumaParcialPi(casiPi, proceso, inicio, fin );
+      casiPi[proceso] = resultado;
    }
 
    printf( "Valor calculado de Pi es \033[91m %g \033[0m con %ld terminos\n", casiPi[ 0 ], terminos );
