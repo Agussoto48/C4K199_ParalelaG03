@@ -18,7 +18,7 @@ build: | $(BIN_DIR)
 
 
 run:
-	./$(EXE) $(ARGS)
+	@./$(EXE) $(ARGS)
 
 clean:
 	@rm -rf $(BIN_DIR)

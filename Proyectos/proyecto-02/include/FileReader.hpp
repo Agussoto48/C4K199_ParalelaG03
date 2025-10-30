@@ -26,22 +26,18 @@ private:
 public:
     FileReader(std::string filename, int hilos, int estrategia);
     ~FileReader();
+
+    //Lógica para contar tags
     int contarLineas();
+    void iniciar_conteo();
 
-    bool hasNext(){
-        return !file.eof();
-    }
-    std::string getNext(){
-        std::string line;
-        if(std::getline(file, line)){
-            return line;
-        }
-        return "";
-    }
-
-    //Estrategias
-    static void* estrategia_1(void* arg);
-    static void* estrategia_2(void* arg);
-    static void* estrategia_3(void* arg);
-    static void* estrategia_4(void* arg);
+    //Comprobantes para seguir leyendo
+    bool hasNext();
+    std::string getNext();
 };
+
+//Estrategias
+void* estrategia_1(void* arg);
+void* estrategia_2(void* arg);
+void* estrategia_3(void* arg);
+void* estrategia_4(void* arg);

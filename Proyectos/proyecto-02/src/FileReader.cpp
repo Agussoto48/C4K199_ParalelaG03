@@ -27,26 +27,54 @@ int FileReader::contarLineas(){
     file.close();
 }
 
-//Estrategias
-void* FileReader::estrategia_1(void*arg){
-    std::cout<<"\nEstrategia 1\n";
-    FileReader* trabajador = (FileReader*) arg;
-
-    for (int i = 0; i < numHilos; ++i) {
-       pthread_create(&threads[i], nullptr, estrategia_1, this); // o según la estrategia
+void FileReader::iniciar_conteo(){
+    //Puntero generico para que apunte a una fucnion
+    void* (*estrategia_escogida)(void*) = nullptr;
+    switch (estrategia) {
+        case 1: estrategia_escogida = estrategia_1; break;
+        case 2: estrategia_escogida = estrategia_2; break;
+        case 3: estrategia_escogida = estrategia_3; break;
+        case 4: estrategia_escogida = estrategia_4; break;
+        default:
+            std::cerr << "Estrategia inválida en archivo: " << filename << std::endl;
+            return;
     }
+    //Revisar que si tiene asignada funcion
+    if (!estrategia_escogida){
+        std::cerr << "\nAlgo salió mal al asignar la estrategia en el archivo: " << this->filename << std::endl;
+        return;
+    } 
 
-    for (int i = 0; i < numHilos; ++i) {
+    //Creacion y destruccion de los hilos, pasando la clase como parametro
+    for (int i = 0; i < this->numHilos; ++i)
+        pthread_create(&threads[i], nullptr, estrategia_escogida, this);
+
+    for (int i = 0; i < this->numHilos; ++i)
         pthread_join(threads[i], nullptr);
-    }
-    
+
 }
-void* FileReader::estrategia_2(void*arg){
+
+bool FileReader::hasNext(){
+        return !file.eof();
+    }
+std::string FileReader::getNext(){
+    std::string line;
+    if(std::getline(file, line)){
+        return line;
+    }
+    return "";
+}
+
+//------------------------------Estrategias de Lectura---------------------------
+void* estrategia_1(void*arg){
+    std::cout << "Estratregia 1\n";   
+}
+void*estrategia_2(void*arg){
     std::cout<<"\nEstrategia 2\n";
 }
-void* FileReader::estrategia_3(void*arg){
+void* estrategia_3(void*arg){
     std::cout<<"\nEstrategia 3\n";
 }
-void* FileReader::estrategia_4(void*arg){
+void* estrategia_4(void*arg){
     std::cout<<"\nEstrategia 4\n";
 }
