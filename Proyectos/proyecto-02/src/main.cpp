@@ -6,12 +6,17 @@ bool manejar_parametros(int argc, char* argv[], int& trabajadores, std::vector<i
 
 int main(int argc, char* argv[]) {
     int trabjadores = 0;
-    std::vector<int> estrategias(1);
-    std::vector<std::string> archivos(1);
+    std::vector<int> estrategias;
+    std::vector<std::string> archivos;
     if(!manejar_parametros(argc, argv, trabjadores, estrategias, archivos)){
         return 1;
     }
-    
+    int procesos = archivos.size();
+    for(int i = 0; i < procesos; i++){
+        Contador contador(trabjadores, estrategias[i], archivos[i]);
+        contador.imprimir_datos();
+    }
+
     return 0;
 }
 
@@ -68,16 +73,6 @@ bool manejar_parametros(int argc, char* argv[], int& trabajadores, std::vector<i
     if (estrategias.size() != archivos.size()) {
         std::cerr << "Error: Debe indicar una estrategia por cada archivo\n";
         return false;
-    }
-    for(size_t i = 0; i < archivos.size() - 1; i++){
-        archivos[i] = archivos[i+1];
-        estrategias[i] = estrategias[i+1];
-    }
-    archivos.pop_back();
-    estrategias.pop_back();
-    std::cout << "Hilos: " << trabajadores << std::endl;
-    for (size_t i = 0; i < archivos.size(); i++) {
-        std::cout << "Archivo " << i + 1 << ": " << archivos[i] << " | Estrategia: " << estrategias[i] << std::endl;
     }
     return true;
 }

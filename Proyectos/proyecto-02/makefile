@@ -20,6 +20,9 @@ build: | $(BIN_DIR)
 run:
 	@./$(EXE) $(ARGS)
 
+memcheck:
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(EXE) $(ARGS)
+
 clean:
 	@rm -rf $(BIN_DIR)
 

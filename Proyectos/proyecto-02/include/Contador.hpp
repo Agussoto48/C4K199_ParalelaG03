@@ -15,4 +15,5 @@ class Contador{
         ~Contador();
         void empezar_lectura();
         void printResults() const;  
+        void imprimir_datos();
 };

@@ -24,7 +24,7 @@ private:
     pthread_mutex_t mutex;
 
 public:
-    FileReader(std::string filename, int hilos, int estrategia);
+    FileReader(int hilos, int estrategia, std::string filename);
     ~FileReader();
 
     //Lógica para contar tags

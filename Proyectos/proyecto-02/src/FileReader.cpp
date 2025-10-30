@@ -4,8 +4,8 @@
 /*
 -----------Contructores------------------------
 */
-FileReader::FileReader(std::string filename, int hilos, int estrategia):
-    filename(filename),  numHilos(hilos), estrategia(estrategia)
+FileReader::FileReader(int hilos, int estrategia, std::string filename):
+    numHilos(hilos),  estrategia(estrategia), filename(filename)
     {
         pthread_mutex_init(&mutex, nullptr);
         threads = new pthread_t[numHilos];
@@ -24,7 +24,14 @@ int FileReader::contarLineas(){
         std::cerr << "Error al abrir el archivo: " << filename << std::endl;
         return 0;
     }
+    std::string line;
+    int total = 0;
+    while(std::getline(file, line)){
+        total++;
+    }
     file.close();
+
+    return total;
 }
 
 void FileReader::iniciar_conteo(){
@@ -68,13 +75,18 @@ std::string FileReader::getNext(){
 //------------------------------Estrategias de Lectura---------------------------
 void* estrategia_1(void*arg){
     std::cout << "Estratregia 1\n";   
+
+    return nullptr;
 }
 void*estrategia_2(void*arg){
     std::cout<<"\nEstrategia 2\n";
+    return nullptr;
 }
 void* estrategia_3(void*arg){
     std::cout<<"\nEstrategia 3\n";
+    return nullptr;
 }
 void* estrategia_4(void*arg){
     std::cout<<"\nEstrategia 4\n";
+    return nullptr;
 }
