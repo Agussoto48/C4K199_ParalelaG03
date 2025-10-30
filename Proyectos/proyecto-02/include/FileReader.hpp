@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -5,21 +6,17 @@
 #include <string>
 #include<pthread.h>
 
-//Estructura para 
-struct hilo_info{
-    int linea_inicio;
-    int linea_final;
-
-};
-
 class FileReader {
 private:
     int numHilos;
     int estrategia;
+    int numLineas;
     std::string filename;
     std::ifstream file;
     std::map<std::string, int> tagCount;
+    std::vector<std::string> lineas;
 
+    //Variables para pthreads
     pthread_t* threads;
     pthread_mutex_t mutex;
 
@@ -28,8 +25,9 @@ public:
     ~FileReader();
 
     //Lógica para contar tags
-    int contarLineas();
+    void contarLineas();
     void iniciar_conteo();
+    void agregar_tags(std::map<std::string, int> hilo_tags);
 
     //Comprobantes para seguir leyendo
     bool hasNext();

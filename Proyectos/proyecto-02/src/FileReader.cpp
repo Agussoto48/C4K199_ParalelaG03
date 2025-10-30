@@ -18,22 +18,25 @@ FileReader::~FileReader(){
 /*
 -----------Lógica general de lectura------------------------
 */
-int FileReader::contarLineas(){
+void FileReader::contarLineas(){
     file.open(filename);
     if(!file.is_open()){
         std::cerr << "Error al abrir el archivo: " << filename << std::endl;
-        return 0;
+        return;
     }
     std::string line;
-    int total = 0;
     while(std::getline(file, line)){
-        total++;
+        this->lineas.push_back(line);
+        this->numLineas++;
     }
     file.close();
-
-    return total;
 }
 
+//----------------------Empezar a Contar tags-----------------------
+struct hilo_info{
+    int id_hilo;
+    FileReader* copia;
+};
 void FileReader::iniciar_conteo(){
     //Puntero generico para que apunte a una fucnion
     void* (*estrategia_escogida)(void*) = nullptr;
@@ -51,14 +54,15 @@ void FileReader::iniciar_conteo(){
         std::cerr << "\nAlgo salió mal al asignar la estrategia en el archivo: " << this->filename << std::endl;
         return;
     } 
-
     //Creacion y destruccion de los hilos, pasando la clase como parametro
-    for (int i = 0; i < this->numHilos; ++i)
-        pthread_create(&threads[i], nullptr, estrategia_escogida, this);
-
+    for (int i = 0; i < this->numHilos; ++i){
+        hilo_info *informacion = new hilo_info;
+        informacion->copia = this;
+        informacion->id_hilo = i;
+        pthread_create(&threads[i], nullptr, estrategia_escogida, (void*)informacion);
+    }
     for (int i = 0; i < this->numHilos; ++i)
         pthread_join(threads[i], nullptr);
-
 }
 
 bool FileReader::hasNext(){
@@ -74,19 +78,42 @@ std::string FileReader::getNext(){
 
 //------------------------------Estrategias de Lectura---------------------------
 void* estrategia_1(void*arg){
+    std::map<std::string, int> hilo_tags;
+    hilo_info *copia = (hilo_info*)arg;
     std::cout << "Estratregia 1\n";   
 
+    
+
+    delete copia;
     return nullptr;
 }
 void*estrategia_2(void*arg){
-    std::cout<<"\nEstrategia 2\n";
+    std::map<std::string, int> hilo_tags;
+    hilo_info *copia = (hilo_info*)arg;
+    std::cout << "Estratregia 2\n";   
+
+    
+
+    delete copia;
     return nullptr;
 }
 void* estrategia_3(void*arg){
-    std::cout<<"\nEstrategia 3\n";
+    std::map<std::string, int> hilo_tags;
+    hilo_info *copia = (hilo_info*)arg;
+    std::cout << "Estratregia 3\n";   
+
+    
+
+    delete copia;
     return nullptr;
 }
 void* estrategia_4(void*arg){
-    std::cout<<"\nEstrategia 4\n";
+    std::map<std::string, int> hilo_tags;
+    hilo_info *copia = (hilo_info*)arg;
+    std::cout << "Estratregia 4\n";   
+
+    
+
+    delete copia;
     return nullptr;
 }

@@ -9,7 +9,7 @@ Contador::~Contador(){}
 
 
 void Contador::empezar_lectura(){
-    
+    reader.iniciar_conteo();
 }
 
 void Contador::printResults() const{

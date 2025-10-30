@@ -1,3 +1,4 @@
+#pragma once
 #include "FileReader.hpp"
 
 class Contador{

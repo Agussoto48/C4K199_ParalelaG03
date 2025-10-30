@@ -1,8 +1,4 @@
-#include "Contador.hpp"
-#include<sstream>
-
-
-bool manejar_parametros(int argc, char* argv[], int& trabajadores, std::vector<int>& estrategias, std::vector<std::string>& archivos);
+#include "logicaMain.hpp"
 
 int main(int argc, char* argv[]) {
     int trabjadores = 0;
@@ -12,67 +8,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     int procesos = archivos.size();
+    pthread_t* threads = new pthread_t[procesos];
     for(int i = 0; i < procesos; i++){
-        Contador contador(trabjadores, estrategias[i], archivos[i]);
-        contador.imprimir_datos();
+        Contador *contador = new Contador(trabjadores, estrategias[i], archivos[i]);
+        pthread_create(&threads[i], nullptr, inicializar_tareas, (void*)contador);
     }
+    for (int i = 0; i < procesos; i++)
+        pthread_join(threads[i], nullptr);
 
+    delete[] threads;
     return 0;
-}
-
-bool manejar_parametros(int argc, char* argv[], int& trabajadores, std::vector<int>& estrategias, std::vector<std::string>& archivos){
-    if (argc < 4) {
-        std::cerr << "\n\nTiene que ejecutar con el formato: " << argv[0] << " -t=int file.html ... -e=int,...\n\n";
-        return false;
-    }
-    std::string basePath = "files/";
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-
-        if (arg.rfind("-t=", 0) == 0) {
-            std::string valor = arg.substr(3);
-            if(valor.empty()){
-                std::cerr << "Error: Debe especificar la cantidad de trabjadores correctamente.\n";
-                return false;
-            }
-            trabajadores = std::stoi(valor);
-        }
-        else if (arg.rfind("-e=", 0) == 0) {
-            std::string lista = arg.substr(3);
-            if(lista.empty()){
-                std::cerr << "Error: Debe especificar la cantidad de estrategias correctamente.\n";
-                return false;
-            }
-            std::stringstream particion(lista);
-            std::string numero;
-            //dividir por comas
-            while (std::getline(particion, numero, ',')) {
-                int estrategia = std::stoi(numero);
-                if(estrategia < 1 || estrategia > 4){
-                    std::cerr << "Error: Debe ingresar una estrategia valida (1-4)\n";
-                    return false;
-                }
-                estrategias.push_back(estrategia);
-
-            }
-        }
-        else {
-            archivos.push_back(basePath + arg);
-        }
-    }
-    
-    //Validar
-    if(trabajadores == 0){
-        std::cerr << "Error: Debe especificar la cantidad de trabjadores correctamente.\n";
-        return false;
-    }
-    if (archivos.empty()) {
-        std::cerr << "Error: Debe especificar al menos un archivo.\n";
-        return false;
-    }
-    if (estrategias.size() != archivos.size()) {
-        std::cerr << "Error: Debe indicar una estrategia por cada archivo\n";
-        return false;
-    }
-    return true;
 }
