@@ -26,9 +26,11 @@ void FileReader::contarLineas(){
         return;
     }
     std::string line;
+    int i = 0;
     while(std::getline(file, line)){
         this->lineas.push_back(line);
         this->numLineas++;
+        this->seleccion_aleatoria.push_back(i++);
     }
     file.close();
 }
@@ -98,7 +100,33 @@ void FileReader::imprimir_tags(){
         std::cout << par.first << ": " << par.second << std::endl;
     }
 }
+//Numero aleatorio
+int rng(int min, int max){
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<> distribution(min, max);
+    return distribution(generator);
+}
+std::string FileReader::elegir_aleatorio(){
+    pthread_mutex_lock(&this->mutex);
 
+    if (seleccion_aleatoria.empty()) {
+        pthread_mutex_unlock(&this->mutex);
+        return "";
+    }
+
+    int maxIndex = seleccion_aleatoria.size() - 1;
+    int aleatorio = rng(0, maxIndex);
+
+    std::string eleccion = lineas[seleccion_aleatoria[aleatorio]];
+
+    // marcar como usado en lugar de borrar
+    seleccion_aleatoria[aleatorio] = seleccion_aleatoria.back();
+    seleccion_aleatoria.pop_back();
+
+    pthread_mutex_unlock(&this->mutex);
+    return eleccion;
+}
 
 //------------------------------Estrategias de Lectura---------------------------
 void* estrategia_1(void*arg){
@@ -249,8 +277,43 @@ void* estrategia_3(void*arg){
 void* estrategia_4(void*arg){
     std::map<std::string, int> hilo_tags;
     hilo_info *informacion = (hilo_info*)arg;
-    std::cout << "Estratregia 4\n";   
+    FileReader * reader = informacion->copia;
 
+    clock_t start = clock();
+    for(int i = 0; i < reader->getNumLineas(); i++){
+
+        const std::string& linea = reader->elegir_aleatorio();
+        if(linea.empty()) continue;
+        size_t pos = 0;
+        while ((pos = linea.find('<', pos)) != std::string::npos) {
+            size_t cierre = linea.find('>', pos + 1);
+            if (cierre != std::string::npos) {
+                std::string tag = linea.substr(pos + 1, cierre - pos - 1);
+
+                // quitar posibles espacios iniciales/finales
+                tag.erase(0, tag.find_first_not_of(" \t"));
+                tag.erase(tag.find_last_not_of(" \t") + 1);
+
+                // ignorar cierres </> o comentarios <!-- -->
+                if (tag.empty() || tag[0] == '/' || tag.rfind("!--", 0) == 0)
+                    { pos = cierre + 1; continue; }
+
+                // si tiene atributos, tomar solo el nombre de la etiqueta
+                size_t espacio = tag.find(' ');
+                if (espacio != std::string::npos)
+                    tag = tag.substr(0, espacio);
+
+                // contar una sola vez la etiqueta de apertura
+                hilo_tags[tag]++;
+
+                pos = cierre + 1;
+            } else break;
+        }
+    }
+    clock_t end = clock();
+
+    double tiempoFinal = double (end - start)/CLOCKS_PER_SEC;
+    reader->setTiempo(tiempoFinal);
     
     informacion->copia->agregar_tags(hilo_tags);
     delete informacion;

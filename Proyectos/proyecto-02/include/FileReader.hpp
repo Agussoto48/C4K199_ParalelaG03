@@ -6,6 +6,7 @@
 #include <string>
 #include<pthread.h>
 #include<time.h>
+#include<random>
 
 class FileReader {
 private:
@@ -24,6 +25,7 @@ private:
 
 public:
     std::vector<std::string> lineas;
+    std::vector<int> seleccion_aleatoria;
 
     FileReader(int hilos, int estrategia, std::string filename);
     ~FileReader();
@@ -33,6 +35,8 @@ public:
     void iniciar_conteo();
     void agregar_tags(std::map<std::string, int> hilo_tags);
     void imprimir_tags();
+
+    std::string elegir_aleatorio();
 
     //Comprobantes para seguir leyendo
     bool hasNext();
