@@ -5,7 +5,7 @@ bool manejar_parametros(int argc, char* argv[], int& trabajadores, std::vector<i
         std::cerr << "\nError: Tiene que ejecutar con el formato: " << argv[0] << " -t=int file.html ... -e=int,...\n";
         return false;
     }
-    std::string basePath = "files/";
+    std::string basePath = "html/";
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
 
@@ -62,7 +62,6 @@ void* inicializar_tareas(void* arg){
     contador->empezar_lectura();
 
 
-    delete contador;
     return nullptr;
 }
 

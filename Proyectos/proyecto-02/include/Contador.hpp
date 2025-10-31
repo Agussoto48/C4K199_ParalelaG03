@@ -1,5 +1,6 @@
 #pragma once
 #include "FileReader.hpp"
+#include<time.h>
 
 class Contador{
 
@@ -7,6 +8,7 @@ class Contador{
         int hilos;
         int estrategia;
         int numLineas;
+        double tiempo_ejecucion;
         std::string filename;
         std::map<std::string, int> tagCount;
         FileReader reader;
@@ -15,6 +17,5 @@ class Contador{
         Contador(int hilos, int est, std::string filename);
         ~Contador();
         void empezar_lectura();
-        void printResults() const;  
         void imprimir_datos();
 };

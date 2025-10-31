@@ -10,16 +10,14 @@ Contador::~Contador(){}
 
 void Contador::empezar_lectura(){
     reader.iniciar_conteo();
-}
 
-void Contador::printResults() const{
-    for (const auto &pair : tagCount) {
-        std::cout << pair.first << ": " << pair.second << std::endl;
-    }
+    tiempo_ejecucion = this->reader.getTiempo();
 }
-
 void Contador::imprimir_datos(){
-    std::cout<<"\n------------------------------";
-    std::cout << "\nHilos: " << this->hilos << ", Est: " << this->estrategia << ", file: " << this->filename; 
-    std::cout << std::endl;
+    this->reader.imprimir_tags();
+    std::cout<<"-----------Informacion--------------------" << std::endl;
+    std::cout << "Numero de hilos: " << this->hilos << std::endl;
+    std::cout << "Estrategia implementada: " << this->estrategia << std::endl;
+    if(this->reader.getTiempo() > 0) std::cout << "Tiempo de ejecucion: " << this->tiempo_ejecucion << std::endl;
+    std::cout<<"-----------Fin de informacion-------------" << std::endl;
 }

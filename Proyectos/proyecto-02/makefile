@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -I../../EntregasSemanales/shared -Iinclude/
+CXXFLAGS = -Wall -std=c++17 -Iinclude/
 
 default: build
 
@@ -14,7 +14,7 @@ SRC = src/*.cpp
 EXE = $(BIN_DIR)/contar
 
 build: | $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) $(SRC) $(SRC_SHARED) -o $(EXE)
+	$(CXX) $(CXXFLAGS) $(SRC) -o $(EXE)
 
 
 run:
