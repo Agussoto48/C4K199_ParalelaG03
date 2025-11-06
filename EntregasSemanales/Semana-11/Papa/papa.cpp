@@ -25,7 +25,7 @@ struct RondaPapa {
    int valor_papa;
    int cuenta_jugadores;
    bool clockwise;
-   bool estados[MAX_PARTICIPANTES];
+   bool estados[256];
 };
 
 SemaphoreMP turno(1);         
@@ -55,20 +55,8 @@ int pasarPapa(RondaPapa* juego) {
 
    return juego->posicion_papa;
 }
-
-int main(int argc, char** argv) {
-   RondaPapa juego;
-   participantes = (argc > 1) ? atoi(argv[1]) : MAX_PARTICIPANTES;
-   if (participantes <= 0 || participantes > MAX_PARTICIPANTES) participantes = MAX_PARTICIPANTES;
-
-   juego.posicion_papa = (argc > 2) ? atoi(argv[2]) : 1;
-   juego.clockwise = (argc > 3) ? atoi(argv[3]) : true;
-   juego.valor_papa = rng(5, 10);
-   juego.cuenta_jugadores = participantes;
-   for (int i = 0; i < participantes; i++) juego.estados[i] = true;
-
-   std::cout << "Iniciando ronda con " << participantes << " jugadores.\n";
-
+void manejoJuego(RondaPapa juego){
+   omp_set_num_threads(participantes);
    #pragma omp parallel num_threads(participantes) shared(juego)
    {
       int id = omp_get_thread_num() + 1;
@@ -114,6 +102,33 @@ int main(int argc, char** argv) {
       }
       mutex.Release();
    }
+}
+int main(int argc, char** argv) {
+   RondaPapa juego;
+   if ( argc > 1 ) {
+      participantes = atoi( argv[ 1 ] );
+   }
+   if ( participantes <= 0 ) {
+      participantes = MAX_PARTICIPANTES;
+   }
+
+   juego.posicion_papa = (argc > 2) ? atoi(argv[2]) : 1;
+   if(argc > 3){
+      int direccion = atoi(argv[3]);
+      if(direccion >= 1){
+         juego.clockwise = true;
+      }
+      else {
+         juego.clockwise = false;
+      }
+   }
+   juego.valor_papa = rng(5, 10);
+   juego.cuenta_jugadores = participantes;
+   for (int i = 0; i < participantes; i++) juego.estados[i] = true;
+
+   std::cout << "Iniciando ronda con " << participantes << " jugadores.\n";
+
+   manejoJuego(juego);
 
    return 0;
 }
