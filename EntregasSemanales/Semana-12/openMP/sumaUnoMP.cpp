@@ -1,15 +1,3 @@
-/**
- *  Suma uno a un total mil veces por cada proceso generado
- *  Recibe como parametro la cantidad de procesos que se quiere arrancar
- *  Author: Programacion Concurrente (Francisco Arroyo)
- *  Version: 2020/Set/25
- *
- *  Compilar con:
- *   g++ -g sumaUnoPT.c -lpthread
- *
- *  Utiliza vectores para crear las estructuras de los hilos
-**/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -80,8 +68,7 @@ int main( int argc, char ** argv ) {
     if ( argc > 1 ) {
         hilos = atol( argv[ 1 ] );
     }
-
-
+    
     total = 0;
     inicio = omp_get_wtime();
     SerialTest( hilos );
