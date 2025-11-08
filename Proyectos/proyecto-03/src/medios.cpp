@@ -1,13 +1,13 @@
 #include <cstdio>
 #include <random>
 #include "VectorPuntos.h"
-#include "LockMP.hpp"
 #include <omp.h>
 #include <iostream>
 #include <exception>
+#include <cstring>
 
-#define PUNTOS 1000
-#define CLASES 17
+#define PUNTOS 100000
+#define CLASES 23
 #define RADIO_CIRCULO 10
 enum modos
 {
@@ -15,27 +15,19 @@ enum modos
    CAMBIO_CLASE = 1
 };
 
-int totalCambios = 0;
+long totalCambios = 0;
 
 // Declaraciones de funciones
-int rng(int min, int max);
+bool analizarArgumentos(int cantidad, char **parametros, int &hilos, long &casillas, long &muestras);
 void asignarPuntosAClases(long *clases_puntos, int modo, VectorPuntos *centros, VectorPuntos *puntos, long &cambios, long muestras, long casillas);
 
 int main(int cantidad, char **parametros)
 {
    long cambios = 0, casillas = CLASES, muestras = PUNTOS;
-   int hilos;
-   Punto *punto;
+   int hilos = 1;
 
-   if (cantidad > 3)
+   if (!analizarArgumentos(cantidad, parametros, hilos, casillas, muestras))
    {
-      casillas = atoi(parametros[1]);
-      muestras = atoi(parametros[2]);
-      hilos = atoi(parametros[3]);
-   }
-   else
-   {
-      std::cerr << "Ingrese los parametros de forma correcta: ./exe <clases> <puntos> <hilos>\n";
       return 0;
    }
 
@@ -44,10 +36,14 @@ int main(int cantidad, char **parametros)
    long *clases_puntos = new long[muestras];
 
    asignarPuntosAClases(clases_puntos, ALEATORIO, centros, puntos, cambios, muestras, casillas);
+
+   omp_set_num_threads(hilos);
+   double inicio = omp_get_wtime();
    do
    {
       cambios = 0;
       // Sacar promedio de los puntos en el area y asignar punto del centro
+      #pragma omp parallel for schedule(dynamic)
       for (int i = 0; i < casillas; i++)
       {
          double sumaX = 0, sumaY = 0;
@@ -64,7 +60,6 @@ int main(int cantidad, char **parametros)
          if (cantidad > 0)
          {
             (*centros)[i]->modificar(sumaX / cantidad, sumaY / cantidad);
-            
          }
       }
 
@@ -73,9 +68,13 @@ int main(int cantidad, char **parametros)
       totalCambios += cambios;
 
    } while (cambios > 0);
+   double final = omp_get_wtime();
 
-   printf("Valor de la disimilaridad en la solución encontrada %g, con un total de %ld cambios\n", centros->disimilaridad(puntos, clases_puntos), totalCambios);
+   std::cout << "Valor de la disimilaridad en la solución encontrada " << centros->disimilaridad(puntos, clases_puntos);
+   std::cout << ", con un total de " << totalCambios << " cambios\n";
 
+   std::cout << "Tiempo total de ejecucion: " << final - inicio << "s con " << hilos << " hilos";
+   std::cout << ", " << casillas << " centros y " << muestras << " puntos totales" << std::endl;
    puntos->genEpsFormat(centros, clases_puntos, (char *)"ci0117.eps");
 
    delete centros;
@@ -86,12 +85,30 @@ int main(int cantidad, char **parametros)
 }
 
 // Definición de funciones
-int rng(int min, int max)
+bool analizarArgumentos(int cantidad, char **parametros, int &hilos, long &clases, long &puntos)
 {
-   std::random_device rd;
-   std::mt19937 gen(rd());
-   std::uniform_int_distribution<> dist(min, max);
-   return dist(gen);
+   bool condicion = true;
+   for (int i = 1; i < cantidad; i++)
+   {
+      if (strncmp(parametros[i], "-t=", 3) == 0)
+      {
+         hilos = atoi(parametros[i] + 3);
+      }
+      else if (strncmp(parametros[i], "-p=", 3) == 0)
+      {
+         puntos = atol(parametros[i] + 3);
+      }
+      else if (strncmp(parametros[i], "-c=", 3) == 0)
+      {
+         clases = atol(parametros[i] + 3);
+      }
+      else
+      {
+         std::cerr << "ERROR: Parámetro desconocido: " << parametros[i] << "\n";
+         condicion = false;
+      }
+   }
+   return condicion;
 }
 void asignarPuntosAClases(long *clases_puntos, int modo, VectorPuntos *centros, VectorPuntos *puntos, long &cambios, long muestras, long casillas)
 {
@@ -107,6 +124,7 @@ void asignarPuntosAClases(long *clases_puntos, int modo, VectorPuntos *centros, 
       }
       break;
    case CAMBIO_CLASE:
+      #pragma omp parallel for reduction(+: cambios)
       for (int j = 0; j < muestras; j++)
       {
          long nuevaClase = centros->masCercano((*puntos)[j]);

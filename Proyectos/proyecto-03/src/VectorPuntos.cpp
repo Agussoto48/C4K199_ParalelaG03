@@ -17,7 +17,7 @@ VectorPuntos::VectorPuntos(long cantidad, double radio)
    double angulo, r, x, y;
 
    this->elementos = cantidad;
-   this->bloque = new Punto*[cantidad];
+   this->bloque = new Punto *[cantidad];
    for (long i = 0; i < cantidad; i++)
    {
       angulo = randf(2 * M_PI);
@@ -34,7 +34,7 @@ VectorPuntos::VectorPuntos(long cantidad)
 {
 
    this->elementos = cantidad;
-   this->bloque = new Punto*[cantidad];
+   this->bloque = new Punto *[cantidad];
    for (long i = 0; i < cantidad; i++)
    {
       bloque[i] = new Punto(0, 0);
@@ -107,7 +107,7 @@ double VectorPuntos::variabilidad(Punto *centro, long clase, long *clases)
          sum += this->bloque[elemento]->dist2(centro);
       }
    }
-   
+
    return sum;
 }
 /**
@@ -151,7 +151,7 @@ void VectorPuntos::genEpsFormat(VectorPuntos *centros, long *clases, char *fileN
    FILE *eps;
 
    cantidadCentros = centros->size();
-   colors = new double[3*cantidadCentros];
+   colors = new double[3 * cantidadCentros];
 
    for (clase = 0; clase < cantidadCentros; clase++)
    {
@@ -161,7 +161,8 @@ void VectorPuntos::genEpsFormat(VectorPuntos *centros, long *clases, char *fileN
       colors[pos + 2] = (9 * clase % cantidadCentros) / (double)cantidadCentros;
    }
 
-   maxX = maxX = -(minY = minY = HUGE_VAL);
+   minX = minY = HUGE_VAL;
+   maxX = maxY = -HUGE_VAL;
    for (pos = 0; pos < this->elementos; pos++)
    {
       if (maxX < this->bloque[pos]->getX())
