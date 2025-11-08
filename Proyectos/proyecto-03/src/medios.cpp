@@ -2,51 +2,87 @@
 #include <random>
 #include "VectorPuntos.h"
 #include "LockMP.hpp"
-#include<omp.h>
+#include <omp.h>
+#include <iostream>
+#include <exception>
 
-#define PUNTOS 100000
+#define PUNTOS 1000
 #define CLASES 17
+#define RADIO_CIRCULO 10
+enum modos
+{
+   ALEATORIO = 0,
+   CAMBIO_CLASE = 1
+};
 
 int totalCambios = 0;
 
 // Declaraciones de funciones
 int rng(int min, int max);
-void asignarPuntosAClases(long *clases, int modo);
+void asignarPuntosAClases(long *clases_puntos, int modo, VectorPuntos *centros, VectorPuntos *puntos, long &cambios, long muestras, long casillas);
 
 int main(int cantidad, char **parametros)
 {
-   long cambios, clase, minimo, pto;
+   long cambios = 0, casillas = CLASES, muestras = PUNTOS;
+   int hilos;
    Punto *punto;
-   long casillas = CLASES;
-   long muestras = PUNTOS;
 
-   // Procesar los parámetros del programa
-   // ...
-   //------
+   if (cantidad > 3)
+   {
+      casillas = atoi(parametros[1]);
+      muestras = atoi(parametros[2]);
+      hilos = atoi(parametros[3]);
+   }
+   else
+   {
+      std::cerr << "Ingrese los parametros de forma correcta: ./exe <clases> <puntos> <hilos>\n";
+      return 0;
+   }
 
    VectorPuntos *centros = new VectorPuntos(casillas);
-   VectorPuntos *puntos = new VectorPuntos(muestras, 10); // Genera un conjunto de puntos limitados a un círculo de radio 10
-   long clases[muestras];                                 // Almacena la clase a la que pertenece cada punto
-   long contClases[casillas];
+   VectorPuntos *puntos = new VectorPuntos(muestras, RADIO_CIRCULO);
+   long *clases_puntos = new long[muestras];
 
-   asignarPuntosAClases(clases, 0); // Asigna los puntos a las clases establecidas
-
+   asignarPuntosAClases(clases_puntos, ALEATORIO, centros, puntos, cambios, muestras, casillas);
    do
    {
-      // Coloca todos los centros en el origen
-      // Promedia los elementos del conjunto para determinar el nuevo centro
+      cambios = 0;
+      // Sacar promedio de los puntos en el area y asignar punto del centro
+      for (int i = 0; i < casillas; i++)
+      {
+         double sumaX = 0, sumaY = 0;
+         int cantidad = 0;
+         for (int j = 0; j < muestras; j++)
+         {
+            if (clases_puntos[j] == i)
+            {
+               sumaX += (*puntos)[j]->getX();
+               sumaY += (*puntos)[j]->getY();
+               cantidad++;
+            }
+         }
+         if (cantidad > 0)
+         {
+            (*centros)[i]->modificar(sumaX / cantidad, sumaY / cantidad);
+            
+         }
+      }
 
-      cambios = 0; // Almacena la cantidad de puntos que cambiaron de conjunto
-                   // Cambia la clase de cada punto al centro más cercano
+      asignarPuntosAClases(clases_puntos, CAMBIO_CLASE, centros, puntos, cambios, muestras, casillas);
 
       totalCambios += cambios;
 
-   } while (cambios > 0); // Si no hay cambios el algoritmo converge
+   } while (cambios > 0);
 
-   printf("Valor de la disimilaridad en la solución encontrada %g, con un total de %ld cambios\n", centros->disimilaridad(puntos, clases), totalCambios);
+   printf("Valor de la disimilaridad en la solución encontrada %g, con un total de %ld cambios\n", centros->disimilaridad(puntos, clases_puntos), totalCambios);
 
-   // Con los valores encontrados genera el archivo para visualizar los resultados
-   puntos->genEpsFormat(centros, clases, (char *)"ci0117.eps");
+   puntos->genEpsFormat(centros, clases_puntos, (char *)"ci0117.eps");
+
+   delete centros;
+   delete puntos;
+   delete[] clases_puntos;
+
+   return 0;
 }
 
 // Definición de funciones
@@ -57,25 +93,29 @@ int rng(int min, int max)
    std::uniform_int_distribution<> dist(min, max);
    return dist(gen);
 }
-/**
- *  Coloca a cada punto en una clase de manera aleatoria
- *  Utiliza el vector de clases para realizar la asignación
- *
- **/
-void asignarPuntosAClases(long *clases, int modo)
+void asignarPuntosAClases(long *clases_puntos, int modo, VectorPuntos *centros, VectorPuntos *puntos, long &cambios, long muestras, long casillas)
 {
    long clase, pto;
 
    switch (modo)
    {
-   case 0: // Aleatorio
-      for (pto = 0; pto < PUNTOS; pto++)
+   case ALEATORIO:
+      for (pto = 0; pto < muestras; pto++)
       {
-         clase = rand() % CLASES;
-         clases[pto] = clase;
+         clase = rand() % casillas;
+         clases_puntos[pto] = clase;
       }
       break;
-   case 1: // A construir por los estudiantes
+   case CAMBIO_CLASE:
+      for (int j = 0; j < muestras; j++)
+      {
+         long nuevaClase = centros->masCercano((*puntos)[j]);
+         if (nuevaClase != clases_puntos[j])
+         {
+            clases_puntos[j] = nuevaClase;
+            cambios++;
+         }
+      }
       break;
    }
 }

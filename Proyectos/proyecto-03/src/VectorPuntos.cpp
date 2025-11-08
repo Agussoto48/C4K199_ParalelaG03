@@ -14,18 +14,17 @@ double randf(double base)
  **/
 VectorPuntos::VectorPuntos(long cantidad, double radio)
 {
-   long punto;
    double angulo, r, x, y;
 
    this->elementos = cantidad;
    this->bloque = new Punto*[cantidad];
-   for (punto = 0; punto < cantidad; punto++)
+   for (long i = 0; i < cantidad; i++)
    {
       angulo = randf(2 * M_PI);
       r = randf(radio);
       x = r * cos(angulo);
       y = r * sin(angulo);
-      this->bloque[punto] = new Punto(x, y);
+      this->bloque[i] = new Punto(x, y);
    }
 }
 /**
@@ -33,13 +32,12 @@ VectorPuntos::VectorPuntos(long cantidad, double radio)
  **/
 VectorPuntos::VectorPuntos(long cantidad)
 {
-   long elemento;
 
    this->elementos = cantidad;
    this->bloque = new Punto*[cantidad];
-   for (elemento = 0; elemento < cantidad; elemento++)
+   for (long i = 0; i < cantidad; i++)
    {
-      bloque[elemento] = new Punto(0, 0);
+      bloque[i] = new Punto(0, 0);
    }
 }
 VectorPuntos::~VectorPuntos()
@@ -51,7 +49,7 @@ VectorPuntos::~VectorPuntos()
    delete[] this->bloque;
 }
 /**
- *  Retorna el elemento en la posición indicada del vector
+ *  Retorna el punto en la posición indicada del vector
  *
  **/
 Punto *VectorPuntos::operator[](long posicion)
@@ -63,15 +61,13 @@ Punto *VectorPuntos::operator[](long posicion)
 /**
  *
  **/
-long VectorPuntos::demeTamano()
+long VectorPuntos::size()
 {
-
    return this->elementos;
 }
 
 /**
  *  De los puntos en nuestro bloque encuentra el que esta más cercano al punto indicado como parámetro
- *
  **/
 long VectorPuntos::masCercano(Punto *punto)
 {
@@ -98,7 +94,6 @@ long VectorPuntos::masCercano(Punto *punto)
  *   Suma de las distancias Euclidianas entre el centro y los elementos de su grupo
  *   @param	centro punto central (media) de cada grupo
  *   @param	clases	vector con los datos de pertenencia a las clases de los puntos
- *
  **/
 double VectorPuntos::variabilidad(Punto *centro, long clase, long *clases)
 {
@@ -112,10 +107,9 @@ double VectorPuntos::variabilidad(Punto *centro, long clase, long *clases)
          sum += this->bloque[elemento]->dist2(centro);
       }
    }
-
+   
    return sum;
 }
-
 /**
  *   La suma de todas la variabilidades de todos los grupos
  *   @param	muestras	vector con las muestras
@@ -156,7 +150,7 @@ void VectorPuntos::genEpsFormat(VectorPuntos *centros, long *clases, char *fileN
    double *colors;
    FILE *eps;
 
-   cantidadCentros = centros->demeTamano();
+   cantidadCentros = centros->size();
    colors = new double[3*cantidadCentros];
 
    for (clase = 0; clase < cantidadCentros; clase++)

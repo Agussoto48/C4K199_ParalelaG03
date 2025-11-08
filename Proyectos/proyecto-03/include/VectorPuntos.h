@@ -6,7 +6,7 @@ class VectorPuntos {
       VectorPuntos( long, double );
       VectorPuntos( long );
       ~VectorPuntos();
-      long demeTamano();
+      long size();
       long masCercano( Punto * );
       double variabilidad( Punto *, long, long * );
       double disimilaridad( VectorPuntos *, long * );
