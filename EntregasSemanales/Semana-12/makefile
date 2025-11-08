@@ -5,7 +5,7 @@ default: buildAll
 BIN_DIR = bin
 
 #Archivos fuentes
-SRC_MATRICES = openMP/matricesMP.cpp
+SRC_MATRICES = openMP/OtroDeMatrices.cpp
 SRC_SUMA = openMP/sumaUnoMP.cpp
 SRC_PI = openMP/piPorSeriesMP.cpp
 
@@ -26,10 +26,10 @@ buildPi: | $(BIN_DIR)
 buildAll: buildMatrices buildSuma buildPi 
 
 runMatrices:
-	@./$(EXE_MATRICES)
+	@./$(EXE_MATRICES) $(ARGS)
 
 runSuma:
-	@./$(EXE_SUMA)
+	@./$(EXE_SUMA) $(ARGS)
 
 runPi:
 	@./$(EXE_PI)
