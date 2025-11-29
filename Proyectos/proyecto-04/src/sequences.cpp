@@ -1,42 +1,39 @@
 #include <stdio.h>
 #include <string>
 #include "adn.h"
-#include<iostream>
-
-
-//Definicion de funciones
-void printSubsequences(std::string str, int start, int end, std::string curStr = "");
+#include <mpi.h>
+#include <iostream>
 
 int main(int argumentos, char **valores)
 {
-	ADN *adn1 = new ADN("AAAAA");
-	ADN *adn2 = new ADN("AAAA");
-	ADN *adn3 = new ADN(1024);
-	std::string test = "ACCGGT";
+	MPI_Init(&argumentos, &valores);
 
-	printf("Random sequence: %s\n", adn3->toString().c_str());
+	ADN *adn1 = new ADN("ACCGGTCGAGTGCGCGGAAGCCGGCCGAA");
+	ADN *adn2 = new ADN("GTCGTTCGGAATGGCCGTTGCTCTGTAA");
+	ADN *adn3 = new ADN(100);
+	ADN *adn4 = new ADN(100);
+	double inicio, fin;
 
-	std::string hola =  ADN::compararADN("ACCGGTCGAGTGCGCGGAAGCCGGCCGAA", "GTCGTTCGGAATGGCCGTTGCTCTGTAA");
-	std::cout << "\n" << hola << std::endl;
+	inicio = MPI_Wtime();
+	std::string mejor_definido = ADN::compararADN(adn1->getSequence(), adn2->getSequence());
+	fin = MPI_Wtime();
+
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if (rank == 0)
+	{
+		std::cout << "\nEl resultado de las cadenas fue:\n";
+		std::cout << "\nLa cadena en comun más larga fue: " << mejor_definido << std::endl;
+		std::cout << "Con un tamaño de: " << mejor_definido.size() << std::endl;
+
+		 std::cout << "Tiempo: " << (fin - inicio) << " segundos\n";
+	}
+
+	delete adn4;
 	delete adn3;
 	delete adn2;
 	delete adn1;
-}
 
-//Declaracion de funciones
-void printSubsequences(std::string str, int start, int end, std::string curStr)
-{
-	// base case
-	if (start == end)
-	{
-		return;
-	}
-	// print current string permutation
-	printf("%s\n", curStr.c_str());
-	for (int i = start + 1; i < end; i++)
-	{
-		curStr += str[i];
-		printSubsequences(str, i, end, curStr);
-		curStr = curStr.erase(curStr.size() - 1);
-	}
+	MPI_Finalize();
+	return 0;
 }

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <bits/stdc++.h>
+#include <mpi.h>
 
 #include "adn.h"
 
@@ -133,7 +134,7 @@ void explorar(const std::string &S1, const std::string &S2, size_t inicio_1, siz
       return;
    }
 
-   //Busca las letras comunes en ambos strings
+   // Busca las letras comunes en ambos strings
    std::set<char> comunes;
    for (size_t a = inicio_1; a < S1.size(); a++)
       for (size_t b = inicio_2; b < S2.size(); b++)
@@ -164,11 +165,101 @@ void explorar(const std::string &S1, const std::string &S2, size_t inicio_1, siz
       explorar(S1, S2, match_en_1 + 1, match_en_2 + 1, actual + c, mejor);
    }
 }
-std::string ADN::compararADN(const std::string &string_1, const std::string &string_2)
+std::string ADN::compararADN(const std::string &A, const std::string &B)
 {
-   std::string mejor = "";
-   std::string actual = "";
-   size_t inicio_1 = 0, inicio_2 = 0;
-   explorar(string_1, string_2, inicio_1, inicio_2, actual, mejor);
-   return mejor;
+   int rank, size;
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+   std::string mejorGlobal = "";
+   std::string mejorLocal = "";
+
+   //Un hilo
+   if (size == 1)
+   {
+      std::string mejor;
+      explorar(A, B, 0, 0, "", mejor);
+      return mejor;
+   }
+   //Varios hilos
+   //El primero define los puntos de partida
+   if (rank == 0)
+   {
+      std::set<char> comunes;
+      for (char c1 : A)
+         for (char c2 : B)
+            if (c1 == c2)
+               comunes.insert(c1);
+
+      std::vector<char> ramas(comunes.begin(), comunes.end());
+
+      int worker = 1;
+      for (char c : ramas)
+      {
+         if (worker >= size)
+            break;
+         MPI_Send(&c, 1, MPI_CHAR, worker, 0, MPI_COMM_WORLD);
+         worker++;
+      }
+
+      char fin = '#';
+      for (; worker < size; worker++)
+         MPI_Send(&fin, 1, MPI_CHAR, worker, 0, MPI_COMM_WORLD);
+
+      for (int p = 1; p < size; p++)
+      {
+         int len = 0;
+         MPI_Recv(&len, 1, MPI_INT, p, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+         if (len == 0)
+            continue;
+
+         std::vector<char> buf(len);
+         MPI_Recv(buf.data(), len, MPI_CHAR, p, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+         std::string recibido(buf.begin(), buf.end());
+         if (recibido.size() > mejorGlobal.size())
+            mejorGlobal = recibido;
+      }
+
+      return mejorGlobal;
+   }
+   //Ya los demas empiezan a partir de ese punto a buscar el string
+   else
+   {
+      char letra;
+      MPI_Recv(&letra, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+      if (letra == '#')
+      {
+         int zero = 0;
+         MPI_Send(&zero, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+         return "";
+      }
+      size_t pos1 = 0, pos2 = 0;
+
+      while (pos1 < A.size() && A[pos1] != letra)
+         pos1++;
+      while (pos2 < B.size() && B[pos2] != letra)
+         pos2++;
+
+      if (pos1 == A.size() || pos2 == B.size())
+      {
+         int zero = 0;
+         MPI_Send(&zero, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+         return "";
+      }
+
+      // Explorar la rama correspondiente
+      explorar(A, B, pos1 + 1, pos2 + 1, std::string(1, letra), mejorLocal);
+
+      // Enviar resultado al master
+      int len = mejorLocal.size();
+      MPI_Send(&len, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+
+      if (len > 0)
+         MPI_Send(mejorLocal.c_str(), len, MPI_CHAR, 0, 2, MPI_COMM_WORLD);
+
+      return mejorLocal;
+   }
 }

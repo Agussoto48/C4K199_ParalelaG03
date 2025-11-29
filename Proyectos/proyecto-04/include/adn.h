@@ -17,5 +17,6 @@ public:
    static std::string compararADN(const std::string& X,const std::string& Y);
 
    inline long getSize() const { return sequence.size(); }
+   inline std::string getSequence() {return sequence;}
 };
 

@@ -18,7 +18,7 @@ build: | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(EXE)
 
 run:
-	mpirun -np $(NP) ./$(EXE) $(ARGS)
+	mpirun --oversubscribe -np $(NP) ./$(EXE) $(ARGS)
 
 #Crea la carpeta bin
 $(BIN_DIR):
