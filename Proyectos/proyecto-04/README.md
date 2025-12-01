@@ -57,3 +57,5 @@ El proyecto utiliza un Makefile para automatizar las tareas de compilación, eje
 * Agustín Soto C4K199
 * Andrés Salas C37104
 
+* El proyecto se trabajó en un git aparte, para poder trabajar juntos, aquí esta el avance de tanto la parte serial como la paralela
+
