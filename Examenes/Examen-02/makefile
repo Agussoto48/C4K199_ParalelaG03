@@ -16,7 +16,7 @@ EXE_MPI := $(BIN_DIR)/ej_mpi
 EXE_OMP := $(BIN_DIR)/ej_omp
 
 #Parámetros MPI
-NP ?= 1 
+NP ?= 4
 ARGS ?=
 
 buildMPI: | $(BIN_DIR)
