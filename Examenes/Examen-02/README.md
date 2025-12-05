@@ -17,6 +17,16 @@
 
 La solución del palindromo se encuentran en el main (ejercicio_opm.cpp) y en adn.cpp, en adn.cpp están las funciones con la lógica del algoritmo
 
+La impresión de los pasos aparecen algunas veces desordenados, por eso mismo se puso un prefijo con un numero para indicar el orden en el que se ejecutó el programa, ejemplo:
+
+"1)" rank 5 ....
+
+"3)" rank 7 ....
+
+"2)" rank 6 ....
+
+Aquí el orden sería rank 5 luego 6 y finalmente 7, siguiendo su prefijo correspondiente
+
 ## Fibonacci
 
 La solución se encuentra en el main (ejercicio_mpi.cpp)
